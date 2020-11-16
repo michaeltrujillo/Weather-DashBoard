@@ -1,11 +1,180 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Dashboard</title>
+    <meta charset="utf-8">
+    <title>Weather API</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <style>
+        * {
+            text-align: center;
+        }
+        .card{
+            margin-left: 45%;
+        }
+        .cityCard{
+            margin-left: 35%;
+        }
+    </style>
 </head>
+
 <body>
-    
+    <div class="container">
+        <div class="row">
+            <div class="col-4">
+                <label for="search">Search for a City:</label>
+                <input class="userinput" id="city" type="search" required>
+                <button class="btn" id="#search-btn" type="button">
+                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-search" fill="currentColor"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd"
+                            d="M10.442 10.442a1 1 0 0 1 1.415 0l3.85 3.85a1 1 0 0 1-1.414 1.415l-3.85-3.85a1 1 0 0 1 0-1.415z" />
+                        <path fill-rule="evenodd"
+                            d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 6.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z" />
+                    </svg>
+                </button>
+            </div>
+            <div class="col-8" id="#weather">
+            </div>
+        </div>
+    </div>
+    <div>
+        <h5>Search History:</h5>
+        <h7 id="searchHx"></h7>
+    </div>
+    <div class="cityCard" style="width: 40rem;">
+        <div class="card-body">
+            <h1 class="card-title current"></h1>
+            <p class="card-text details"></p>
+        </div>
+    </div>
+    <h2 class="forecast"></h2>
+    <div class="card" style="width: 10rem;">
+        <div class="card-body">
+            <h2 class="card-title daily1"></h2>
+            <p class="card-text details1"></p>
+        </div>
+    </div>
+    <div class="card" style="width: 10rem;">
+        <div class="card-body">
+            <h2 class="card-title daily2"></h2>
+            <p class="card-text details2"></p>
+        </div>
+    </div>
+    <div class="card" style="width: 10rem;">
+        <div class="card-body">
+            <h2 class="card-title daily3"></h2>
+            <p class="card-text details3"></p>
+        </div>
+    </div>
+    <div class="card" style="width: 10rem;">
+        <div class="card-body">
+            <h2 class="card-title daily4"></h2>
+            <p class="card-text details4"></p>
+        </div>
+    </div>
+    <div class="card" style="width: 10rem;">
+        <div class="card-body">
+            <h2 class="card-title daily5"></h2>
+            <p class="card-text details5"></p>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+
+        $(".btn").click(function () {
+            var cityname = $("#city").val();
+            $("#searchHx").text(cityname);
+        });
+
+        // Event listener for all button elements
+        $(".btn").on("click", function (event) {
+            //console.log("test1");
+            var city1 = $("#city");
+            var cityname = $("#city").val();
+
+            //console.log(city1);
+            var apikey = "a4f6704be156091ebc19cc43b4b68feb"
+            // Constructing a URL to search Giphy for the name of the person who said the quote
+            var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + cityname + "&appid=" + apikey;
+            // Performing our AJAX GET request
+            var lat = "";
+            var lon = "";
+            $.ajax({
+                url: queryURL,
+                method: "GET"
+            })
+                // After the data comes back from the API
+                .then(function (response) {
+                    //console.log(response);
+                    var d = new Date();
+                    var month = d.getMonth();
+                    var day = d.getDay();
+                    var year = d.getFullYear();
+                    $(".current").text(cityname + " (" + month + "/" + day + "/" + year + ")")
+                    var temperature = response.main.temp;
+                    temperature = ((temperature - 273.15) * (9 / 5) + 32).toFixed(1);
+                    var humidity = response.main.humidity;
+                    //console.log(humidity);
+                    //console.log(temperature);
+                    //console.log(response);
+                    var windspeed = response.wind.speed;
+                    //console.log(windspeed);
+                    lat = response.coord.lat;
+                    lon = response.coord.lon;
+                    //console.log(lat);
+                    //console.log(lon);
+                    $(".details").append(`Temperature: ${temperature} F`);
+                    $(".details").append(`<br>Humidity: ${humidity}%`);
+                    $(".details").append(`<br>Wind Speed: ${windspeed} MPH`);
+                    //$(".details").append(`<br>UV Index:`)
+                    var queryURL_1 = "https://api.openweathermap.org/data/2.5/onecall?lat=" + lat + "&lon=" + lon + "&exclude=minutely&appid=" + apikey;
+                    $.ajax({
+                        url: queryURL_1,
+                        method: "GET"
+                    }).then(function (response) {
+                        //console.log(response);
+                        $(".details").append(`<br>UV Index: ${response.current.uvi}`);
+                    });
+                    var queryURL_2 = "https://api.openweathermap.org/data/2.5/onecall?lat=" + lat + "&lon=" + lon + "&exclude=minutely,hourly&appid=" + apikey;
+                    $.ajax({
+                        url: queryURL_2,
+                        method: "GET"
+                    }).then(function (response) {
+                        console.log(response);
+                        $(".forecast").append("5-Day Forecast:");
+                        //console.log(response.daily[0].dt)
+                        $(".daily1").append(month + "/" + (day + 1) + "/" + year);
+                        var temp1 = response.daily[0].temp.day;
+                        temp1 = ((temp1 - 273.15) * (9 / 5) + 32).toFixed(1);
+                        var temp2 = response.daily[1].temp.day;
+                        temp2 = ((temp2 - 273.15) * (9 / 5) + 32).toFixed(1);
+                        var temp3 = response.daily[2].temp.day;
+                        temp3 = ((temp3 - 273.15) * (9 / 5) + 32).toFixed(1);
+                        var temp4 = response.daily[3].temp.day;
+                        temp4 = ((temp4 - 273.15) * (9 / 5) + 32).toFixed(1);
+                        var temp5 = response.daily[4].temp.day;
+                        temp5 = ((temp5 - 273.15) * (9 / 5) + 32).toFixed(1);
+                        $(".details1").append(`Temp: ${temp1}F`)
+                        $(".details1").append(`<br>Humidity: ${response.daily[0].humidity}`);
+                        $(".daily2").append(month + "/" + (day + 2) + "/" + year);
+                        $(".details2").append(`Temp: ${temp2}F`);
+                        $(".details2").append(`<br>Humidity: ${response.daily[1].humidity}`);
+                        $(".daily3").append(month + "/" + (day + 3) + "/" + year);
+                        $(".details3").append(`Temp: ${temp3}F`);
+                        $(".details3").append(`<br>Humidity: ${response.daily[2].humidity}`);
+                        $(".daily4").append(month + "/" + (day + 4) + "/" + year);
+                        $(".details4").append(`Temp: ${temp4}F`);
+                        $(".details4").append(`<br>Humidity: ${response.daily[3].humidity}`);
+                        $(".daily5").append(month + "/" + (day + 5) + "/" + year);
+                        $(".details5").append(`Temp: ${temp5}F`);
+                        $(".details5").append(`<br>Humidity: ${response.daily[4].humidity}`);
+                    })
+                });
+        });
+    </script>
 </body>
+
 </html>
